@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CurviPath - Simulación de trayectoria curvilínea</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-styles.css') }}">
+</head>
+<body>
+    <header class="app-header">
+        <div class="container">
+            <h1><i class="fas fa-chart-line me-2"></i>CurviPath</h1>
+            <p>Simulación avanzada de trayectorias curvilíneas y análisis de movimiento</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="app-card mb-4">
+                    <div class="app-card-header">
+                        <h2 class="app-card-title">
+                            <i class="fas fa-sliders me-2"></i>Parámetros de la simulación
+                        </h2>
+                    </div>
+                    <div class="app-card-body">
+                        <form id="paramsForm" class="needs-validation">
+                            <div class="row mb-4">
+                                <div class="col-md-4 mb-3">
+                                    <label for="t_max" class="form-label">Tiempo máximo (t_max)</label>
+                                    <div class="input-group">
+                                        <input type="number" id="t_max" name="t_max" min="1" step="0.1" value="10" 
+                                            class="form-control" aria-describedby="timeHelpBlock" />
+                                        <span class="input-group-text">s</span>
+                                    </div>
+                                    <small id="timeHelpBlock" class="form-text text-muted">
+                                        Duración total de la simulación
+                                    </small>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="intervals" class="form-label">Intervalos de tiempo</label>
+                                    <input type="number" id="intervals" name="intervals" min="10" max="1000" step="10" value="100" 
+                                        class="form-control" aria-describedby="intervalsHelpBlock" />
+                                    <small id="intervalsHelpBlock" class="form-text text-muted">
+                                        Número de puntos a calcular
+                                    </small>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-center mb-3">
+                                    <div class="form-check form-switch ms-2">
+                                        <input class="form-check-input" type="checkbox" id="visualization3d" name="visualization3d">
+                                        <label class="form-check-label" for="visualization3d">Visualización 3D</label>
+                                    </div>
+                                    <div id="shareStatus" class="ms-auto"></div>
+                                    <button type="button" id="shareBtn" class="btn btn-outline-secondary ms-2" 
+                                        title="Compartir enlace a esta configuración">
+                                        <i class="fas fa-share-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="vector-function-container mb-4">
+                                <label class="form-label fw-bold mb-3">
+                                    <i class="fas fa-function me-2"></i>Funciones vectoriales (x, y, z)
+                                </label>
+                                <div id="vectorFunctionsContainer"></div>
+                                <button type="button" id="addVectorFunctionBtn" class="btn btn-primary mt-3">
+                                    <i class="fas fa-plus me-2"></i>Agregar función
+                                </button>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-12 mb-3">
+                                    <label for="exerciseType" class="form-label">Tipo de ejercicio</label>
+                                    <select id="exerciseType" name="exerciseType" class="form-select">
+                                        <option value="MCU">Movimiento Circular Uniforme (MCU)</option>
+                                        <option value="MCNU">Movimiento Circular No Uniforme (MCNU)</option>
+                                        <option value="TP">Tiro Parabólico (TP)</option>
+                                        <option value="MCG">Movimiento Circular General (MCG)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <label class="form-label fw-bold mb-3">
+                                        <i class="fas fa-square-root-variable me-2"></i>Variables del ejercicio
+                                    </label>
+                                    <div id="variablesContainer" class="row g-3">
+                                        <!-- Variables se generarán dinámicamente según el tipo de ejercicio -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <label for="solveFor" class="form-label">¿Qué desea hallar?</label>
+                                    <select id="solveFor" name="solveFor" class="form-select">
+                                        <!-- Las opciones se generarán dinámicamente según el tipo de ejercicio -->
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" id="solveBtn" class="btn btn-success">
+                                    <i class="fas fa-calculator me-2"></i>Resolver
+                                </button>
+                                <button type="button" id="plotBtn" class="btn btn-primary">
+                                    <i class="fas fa-chart-line me-2"></i>Graficar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="app-card mb-4">
+                    <div class="app-card-header">
+                        <h2 class="app-card-title">
+                            <i class="fas fa-calculator me-2"></i>Solución
+                        </h2>
+                    </div>
+                    <div class="app-card-body">
+                        <div id="solutionOutput" class="solution-output">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-info-circle me-2"></i>Configure los parámetros y haga clic en "Resolver" para ver los resultados
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="charts2d">
+            <div class="row">
+                <div class="col-lg-12 mb-4">
+                    <div class="app-card chart-container">
+                        <h2 class="chart-title">
+                            <i class="fas fa-route me-2"></i>Trayectoria (x vs y)
+                        </h2>
+                        <div class="chart-wrapper">
+                            <canvas id="trajectoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="app-card chart-container">
+                        <h2 class="chart-title">
+                            <i class="fas fa-tachometer-alt me-2"></i>Velocidad (vx, vy)
+                        </h2>
+                        <div class="chart-wrapper">
+                            <canvas id="velocityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="app-card chart-container">
+                        <h2 class="chart-title">
+                            <i class="fas fa-bolt me-2"></i>Aceleración (ax, ay)
+                        </h2>
+                        <div class="chart-wrapper">
+                            <canvas id="accelerationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="chart3d" class="app-card chart-container mb-4" style="display:none;">
+            <div class="app-card-header">
+                <h2 class="app-card-title">
+                    <i class="fas fa-cube me-2"></i>Visualizaciones 3D
+                </h2>
+            </div>
+            <div class="app-card-body">
+                <div class="row">
+                    <div class="col-lg-12 mb-4">
+                        <h3 class="chart-title">Trayectoria 3D</h3>
+                        <div id="trajectory3d" style="width: 100%; height: 500px;"></div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <h3 class="chart-title">Velocidad 3D</h3>
+                        <div id="velocity3d" style="width: 100%; height: 500px;"></div>
+                    </div>
+                    
+                    <div class="col-lg-6 mb-4">
+                        <h3 class="chart-title">Aceleración 3D</h3>
+                        <div id="acceleration3d" style="width: 100%; height: 500px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-1">CurviPath - Herramienta de simulación de trayectorias curvilíneas</p>
+                    <p class="small text-muted">Creada para el estudio de cinemática y movimiento de partículas</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Initialize global variables
+        window.vectorFunctionIdCounter = 0;
+        window.vectorFunctionVisibility = {};
+    </script>
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/calculations.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/visualizations.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
