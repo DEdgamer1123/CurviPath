@@ -13,13 +13,12 @@
 ## *Tecnologías utilizadas*
 
 - Python
-- Flask
 - HTML5 / CSS3
 - JavaScript (módulos: `calculations.js`, `visualizations.js`, `utils.js`)
 
 ## *Estructura del proyecto*
 
-CurviPath/
+`CurviPath/
 ├── app.py
 ├── main.py
 ├── templates/
@@ -31,7 +30,7 @@ CurviPath/
 │ ├── calculations.js
 │ ├── main.js
 │ ├── utils.js
-│ └── visualizations.js
+│ └── visualizations.js`
 
 ## *Instalación local*
 
