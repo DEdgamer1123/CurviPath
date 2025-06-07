@@ -39,10 +39,23 @@
 ```bash
 git clone https://github.com/tu-usuario/CurviPath.git
 cd CurviPath
-# Crea un entorno virtual (opcional pero recomendado)
+```
+
+2. Crea un entorno virtual (opcional pero recomendado):
+
+```bash
 python -m venv env
 source env/bin/activate  # En Windows: env\\Scripts\\activate
-# Instala las dependencias
-pip install flask
-# Ejecuta la aplicación
+```
+
+3. Instala las dependencias
+
+```bash
+pip install flask numpy sympy
+```
+
+4. Ejecuta la aplicación
+
+```bash
 python main.py
+```
