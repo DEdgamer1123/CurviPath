@@ -18,7 +18,8 @@
 
 ## *Estructura del proyecto*
 
-`CurviPath/
+```
+CurviPath/
 ├── app.py
 ├── main.py
 ├── templates/
@@ -30,7 +31,8 @@
 │ ├── calculations.js
 │ ├── main.js
 │ ├── utils.js
-│ └── visualizations.js`
+│ └── visualizations.js
+```
 
 ## *Instalación local*
 
